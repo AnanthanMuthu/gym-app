@@ -1,8 +1,8 @@
+import * as React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
 import Login from "./../screens/Login";
 import Welcome from "../screens/Welcome";
-import { WHITE } from "../constants/colors";
+import { BLACK, WHITE } from "../constants/colors";
 import GymList from "../screens/GymList";
 import ViewGymDetails from "../screens/ViewGymDetails";
 import EditGym from "../screens/EditGym";
@@ -22,6 +22,7 @@ import ScheduleList from "../screens/ScheduleList";
 import AddPlay from "../screens/AddPlay";
 import EditSession from "../screens/EditSession";
 import AssignScheduleModule from "../screens/AssignScheduleModule";
+import VideoPlayer from "../screens/VideoPlayer";
 
 const Stack = createNativeStackNavigator();
 const isAuthendicated = false;
@@ -29,17 +30,30 @@ const initialRouteName = isAuthendicated ? "Gym List" : " ";
 export default RootNav = () => {
   return (
     <Stack.Navigator
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: "transparent",
-        },
-        headerTintColor: WHITE,
-        headerTransparent: true,
-        headerLeftContainerStyle: {
-          paddingLeft: 20,
-          fontSize: 20,
-        },
-        fontSize: 30,
+      drawerContentOptions={(props) => {
+        console.log("### route", props);
+        const noHeader = props?.route?.name === "     ";
+        return {
+          drawerHideStatusBarOnOpen: noHeader ? true : false,
+        };
+      }}
+      screenOptions={(props) => {
+        const noHeader = props?.route?.name === "     ";
+        return {
+          headerStyle: {
+            backgroundColor: "transparent",
+          },
+          headerTintColor: noHeader ? BLACK : WHITE,
+          headerTransparent: true,
+          headerLeftContainerStyle: noHeader
+            ? {}
+            : {
+                paddingLeft: 20,
+                fontSize: 20,
+              },
+          fontSize: 30,
+          headerBackVisible: noHeader ? false : true,
+        };
       }}
       initialRouteName={initialRouteName}
       headerMode="none"
@@ -65,6 +79,7 @@ export default RootNav = () => {
       <Stack.Screen name="Schedule" component={ScheduleList} />
       <Stack.Screen name="Assign Schedule" component={AssignSchedule} />
       <Stack.Screen name="Assign Schedule " component={AssignScheduleModule} />
+      <Stack.Screen name="     " component={VideoPlayer} />
     </Stack.Navigator>
   );
 };

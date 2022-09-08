@@ -5,12 +5,36 @@ const sessionImage = require("./../assets/icon_session.png");
 const scheduleImage = require("./../assets/icon_schedule.png");
 const displayImage = require("./../assets/icon_display.png");
 export const CATEGORIES = [
-  { id: 1, title: "Gym", image: gymImage, route: "Gym List" },
-  { id: 2, title: "Category", image: categoryImage, route: "Category" },
-  { id: 3, title: "Play", image: playImage, route: "Plays" },
-  { id: 4, title: "Session", image: sessionImage, route: "Session" },
-  { id: 5, title: "Schedule", image: scheduleImage, route: "Schedule" },
-  { id: 6, title: "Display", image: displayImage, route: "Display" },
+  { id: 1, title: "Gym", image: gymImage, route: "Gym List", userType: [1] },
+  {
+    id: 2,
+    title: "Category",
+    image: categoryImage,
+    route: "Category",
+    userType: [1],
+  },
+  { id: 3, title: "Play", image: playImage, route: "Plays", userType: [1] },
+  {
+    id: 4,
+    title: "Session",
+    image: sessionImage,
+    route: "Session",
+    userType: [1],
+  },
+  {
+    id: 5,
+    title: "Schedule",
+    image: scheduleImage,
+    route: "Schedule",
+    userType: [1, 2],
+  },
+  {
+    id: 6,
+    title: "Display",
+    image: displayImage,
+    route: "Display",
+    userType: [1, 2],
+  },
 ];
 
 export const STATUS = [

@@ -142,7 +142,13 @@ export default function ViewDisplayDetails({ navigation, route }) {
                   <Ionicons name="md-close" size={20} color="white" />
                   <ButtonText>Delete</ButtonText>
                 </StyledSmallButton>
-                <StyledSmallButton>
+                <StyledSmallButton
+                  onPress={() =>
+                    navigation.navigate("Schedule", {
+                      selectedDisplay: displayDetails,
+                    })
+                  }
+                >
                   <ButtonText>Schedule</ButtonText>
                 </StyledSmallButton>
               </View>

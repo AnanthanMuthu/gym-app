@@ -30,6 +30,8 @@ import {
   setSessionUpdated,
   setScheduleList,
   setScheduleAdded,
+  setScheduleDisplayList,
+  setScheduleDisplay,
 } from "../redux/actions/gym";
 
 export default () => {
@@ -62,6 +64,8 @@ export default () => {
     displayModList,
     scheduleList,
     isScheduleAdded,
+    scheduleDisplayList,
+    scheduleDisplay,
   } = useSelector((state) => state.gym);
 
   const dispatch = useDispatch();
@@ -95,7 +99,6 @@ export default () => {
     const response = await api.post("gym_details.php", formData);
 
     const result = !response.error ? response.gymdata : [];
-    console.log("### getGymList result", formData, response);
     const res = result.map((el) => {
       return { label: el.name, value: el.id, key: el.id };
     });
@@ -238,7 +241,7 @@ export default () => {
     const formData = new FormData();
     formData.append("userid", user.userid);
     formData.append("displayid", "ALL");
-    formData.append("gym", user.type == 1 ? "ALL" : user.gym);
+    formData.append("gym", user?.type == 1 ? "ALL" : user.gym);
 
     const response = await api.post("display_details.php", formData);
     console.log("### getDisplayList", user, formData, response);
@@ -260,6 +263,26 @@ export default () => {
     const result = !response.error ? response.gymdata : [];
     dispatch(setScheduleList(result));
     dispatch(setScheduleAdded(false));
+  };
+
+  const getScheduleDisplay = async (data) => {
+    data = { ...data, display: 10, userid: user.userid };
+    const formData = getFormData(data);
+
+    const response = await api.post("display_schedule.php", formData);
+    console.log("### getScheduleDisplay", formData, response);
+    const result = !response.error ? response.gymdata : [];
+    dispatch(setScheduleDisplay(result));
+  };
+
+  const getScheduleDisplayList = async (data) => {
+    data = { ...data, userid: user.userid };
+    const formData = getFormData(data);
+
+    const response = await api.post("display_schedule_play.php", formData);
+    console.log("### getScheduleDisplayList", formData, response);
+    const result = !response.error ? response.gymdata : [];
+    dispatch(setScheduleDisplayList(result));
   };
 
   const addCategory = async (data) => {
@@ -456,6 +479,8 @@ export default () => {
     scheduleList,
     displayModList,
     isScheduleAdded,
+    scheduleDisplayList,
+    scheduleDisplay,
     getGymList,
     getCategoryList,
     getPlayList,
@@ -483,5 +508,7 @@ export default () => {
     deletePlay,
     getScheduleList,
     assignSchedule,
+    getScheduleDisplayList,
+    getScheduleDisplay,
   };
 };

@@ -66,7 +66,7 @@ const commonStyle = StyleSheet.create({
     borderRadius: 20,
     borderColor: GREY,
     textAlign: "left",
-    width: 400,
+    width: 200,
   },
   dateInner: {
     dateIcon: {

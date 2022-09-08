@@ -27,6 +27,8 @@ import {
   SET_DISPLAY_MOD_LIST,
   SET_SCHEDULE_LIST,
   SET_SCHEDULE_ADDED,
+  SET_SCHEDULE_DISPLAY_LIST,
+  SET_SCHEDULE_DISPLAY,
 } from "../actions/gym";
 
 const initialState = {
@@ -45,6 +47,8 @@ const initialState = {
   sessionList: [],
   sessionModList: [],
   sessionPlayList: [],
+  scheduleDisplayList: [],
+  scheduleDisplay: [],
   scheduleList: [],
   isGymUpdated: false,
   isCategoryUpdated: false,
@@ -228,6 +232,17 @@ export const gymReducer = (state = initialState, { type, payload }) => {
       return {
         ...state,
         isScheduleAdded: payload,
+      };
+
+    case SET_SCHEDULE_DISPLAY_LIST:
+      return {
+        ...state,
+        scheduleDisplayList: payload,
+      };
+    case SET_SCHEDULE_DISPLAY:
+      return {
+        ...state,
+        scheduleDisplay: payload,
       };
 
     default:

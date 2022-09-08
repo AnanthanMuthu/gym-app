@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Dimensions, Image, StyleSheet, View, ScrollView } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import DragSortableView from "./DragSortableView";
 import { Ionicons } from "@expo/vector-icons";
 import { BLACK, WHITE } from "../constants/colors";
@@ -28,20 +35,26 @@ function formatTime(date) {
 }
 
 function ScheduleListChild(props) {
-  const { scheduleList } = props;
-  const { sessionList } = gymServices();
+  const { scheduleList, navigation } = props;
+  const { sessionList, user } = gymServices();
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
   function getSessionName(id) {
     const foundType = sessionList?.find((el) => el.id === id);
-    console.log("### getStatus", sessionList, foundType, typeof id, id);
     return foundType?.name ?? "";
   }
 
-  console.log("#### ScheduleList", scheduleList);
+  const onItemPress = (id) => {
+    navigation.navigate("     ", { scheduleId: id });
+  };
+
   const renderItem = (item, index) => {
     return (
-      <View style={styles.item} key={index}>
+      <TouchableOpacity
+        style={styles.item}
+        key={index}
+        onPress={() => onItemPress(item.sessions)}
+      >
         <View style={styles.item_children}>
           <View style={styles.childItem2}>
             <Ionicons name="play" size={20} color="black" />
@@ -65,10 +78,11 @@ function ScheduleListChild(props) {
             text={getSessionName(item.sessions)}
             color="black"
           />
-
-          <Ionicons name="trash-outline" size={20} color="black" />
+          {user?.type === 1 ? (
+            <Ionicons name="trash-outline" size={20} color="black" />
+          ) : null}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 

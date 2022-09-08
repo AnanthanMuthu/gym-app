@@ -1,12 +1,15 @@
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import gymServices from "../services/gymServices";
 import ScreenContainer from "./../components/ScreenContainer";
 import ScreenLayout from "./../components/ScreenLayout";
 import { MEDIUM_GREY } from "./../constants/colors";
 import { CATEGORIES } from "./../constants/strings";
 
 export default function Welcome({ navigation }) {
+  const { user } = gymServices();
+
   return (
     <SafeAreaProvider>
       <ScreenContainer
@@ -16,19 +19,24 @@ export default function Welcome({ navigation }) {
       >
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <View style={styles.appContainer}>
-            {CATEGORIES?.map((el, key) => (
-              <TouchableOpacity
-                key={key}
-                style={[styles.imgView, el.id % 2 === 0 ? styles.imgView2 : ""]}
-                onPress={() => navigation.navigate(el.route)}
-              >
-                <Image
-                  style={styles.tinyLogo}
-                  source={el.image}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            ))}
+            {CATEGORIES?.map((el, key) =>
+              el.userType.includes(user?.type) ? (
+                <TouchableOpacity
+                  key={key}
+                  style={[
+                    styles.imgView,
+                    el.id % 2 === 0 ? styles.imgView2 : "",
+                  ]}
+                  onPress={() => navigation.navigate(el.route)}
+                >
+                  <Image
+                    style={styles.tinyLogo}
+                    source={el.image}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              ) : null
+            )}
           </View>
         </ScreenLayout>
       </ScreenContainer>

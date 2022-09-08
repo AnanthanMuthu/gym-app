@@ -19,14 +19,13 @@ export default function DisplayList({ navigation }) {
   }, []);
   function getType(type) {
     const foundType = TYPES.find((el) => el.value === type);
-    console.log("### foundType", foundType, typeof type, type);
     return foundType?.label ?? "";
   }
   function getGym(gymId) {
     const foundType = modGymList?.find((el) => el.value === gymId);
-    console.log("### getGym", modGymList, foundType, typeof gymId, gymId);
     return foundType?.label ?? "";
   }
+ 
   return (
     <SafeAreaProvider>
       <ScreenContainer

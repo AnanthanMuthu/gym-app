@@ -89,6 +89,20 @@ export const setScheduleList = (data) => ({
   payload: data,
 });
 
+export const SET_SCHEDULE_DISPLAY_LIST = "SET_SCHEDULE_DISPLAY_LIST";
+
+export const setScheduleDisplayList = (data) => ({
+  type: SET_SCHEDULE_DISPLAY_LIST,
+  payload: data,
+});
+
+export const SET_SCHEDULE_DISPLAY = "SET_SCHEDULE_DISPLAY";
+
+export const setScheduleDisplay = (data) => ({
+  type: SET_SCHEDULE_DISPLAY,
+  payload: data,
+});
+
 export const SET_DISPLAY_MOD_LIST = "SET_DISPLAY_MOD_LIST";
 
 export const setModDisplayList = (data) => ({

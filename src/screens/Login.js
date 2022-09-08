@@ -14,11 +14,14 @@ export default function Login({ navigation }) {
   const { darkLight } = Colors;
   const onSubmit = async (values) => {
     loginAPI(values);
-    // navigation.navigate("Welcome");
   };
   useEffect(() => {
     if (user?.userid) {
-      navigation.navigate("Welcome");
+      if (user?.type === 3 || user?.type === 4) {
+        navigation.navigate("     ");
+      } else {
+        navigation.navigate("Welcome");
+      }
     }
   }, [user]);
   return (

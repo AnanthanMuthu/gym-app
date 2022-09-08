@@ -5,7 +5,7 @@ const axiosClient = axios.create({
   headers: {
     "App-Authorization": `#AYTHELO9MA4FG6XZA3%ARD3QMLARY5JAIOP8LAQW$`,
     Accept: "application/json",
-    "Content-Type": "application/json; charset=utf-8",
+    "Content-Type": "application/json",
   },
 });
 
