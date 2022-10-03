@@ -1,15 +1,28 @@
-import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
-import { ButtonText } from "../components/styles";
+import { ButtonText, Colors } from "../components/styles";
 import ScreenContainer from "../components/ScreenContainer";
 import ScreenLayout from "../components/ScreenLayout";
 import { MEDIUM_GREY, WHITE } from "../constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import gymServices from "../services/gymServices";
 import commonStyle from "./style/commonStyle";
 import Picker from "../components/common/Picker";
+import Norecords from "../components/common/Norecords";
+import ConfirmPopup from "../components/ConfirmPopup";
+
+const deviceHeight = Dimensions.get("window").height;
+const deviceWidth = Dimensions.get("window").width;
+const halfWidth = deviceWidth / 2;
 
 export default function SessionList({ navigation }) {
   const {
@@ -24,10 +37,45 @@ export default function SessionList({ navigation }) {
     getSessionList();
     getGymList();
   }, []);
+  const [searchText, setSearchText] = useState("");
+  const [modSessionList, setSessionList] = useState([]);
 
-  function setGym(gym) {
-    console.log("### selected gym", gym);
-  }
+  //delete
+  const [showPopup, setShowPopup] = useState(false);
+  const [delleteId, setId] = useState(null);
+  const ondelete = (id) => {
+    console.log("### showPopup", showPopup);
+    setShowPopup(false);
+    if (id) {
+      setShowPopup(true);
+      setId(id);
+    } else {
+      deleteSession({ id: delleteId });
+    }
+  };
+  const setModalVisible = () => {
+    setShowPopup(!showPopup);
+  };
+  //end
+  const { darkLight } = Colors;
+  useEffect(() => {
+    if (sessionList) {
+      setSessionList(sessionList);
+    }
+  }, [sessionList]);
+  const handleTextChange = (text) => {
+    setSearchText(text);
+    console.log("### text", text);
+    const temp = text
+      ? sessionList?.filter((el) => {
+          const name = el?.name?.toLowerCase();
+          const tempText = text?.toLowerCase();
+
+          return name?.includes(tempText);
+        })
+      : [];
+    setSessionList(text ? temp : sessionList);
+  };
 
   return (
     <SafeAreaProvider>
@@ -38,36 +86,41 @@ export default function SessionList({ navigation }) {
       >
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <View style={commonStyle.appContainer}>
-            <View style={styles.row}>
-              <View style={styles.gymSelect}>
-                <Picker
-                  value={1}
-                  onValueChange={(value) => setGym(value)}
-                  placeholder={{ label: "Select Gym", value: "", key: "" }}
-                  items={modGymList ?? []}
+            <ScrollView>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 20,
+                  marginLeft: 20,
+                }}
+              >
+                <TextInput
+                  placeholder="Search by Name"
+                  placeholderTextColor={darkLight}
+                  value={searchText}
+                  onChangeText={handleTextChange}
+                  keyboardType="email-address"
+                  style={commonStyle.constantInput3}
                 />
-              </View>
-              <View>
                 <TouchableOpacity
-                  style={commonStyle.topRightBtn}
-                  onPress={() => navigation.navigate("Session Create")}
+                  style={{
+                    position: "absolute",
+                    zIndex: 1,
+                    right: 130,
+                    top: 52,
+                  }}
+                  onPress={() => handleTextChange(searchText)}
                 >
-                  <ButtonText>Create Session</ButtonText>
+                  <Ionicons name="search" size={24} color="black" />
                 </TouchableOpacity>
               </View>
-            </View>
-            <ScrollView>
               <View style={commonStyle.cardHead}>
-                {sessionList?.length <= 0 ? (
-                  <Text
-                    fontSize={14}
-                    lineHeight={60}
-                    style={commonStyle.noRecords}
-                    color={WHITE}
-                    text="No Records found"
-                  />
+                {modSessionList?.length <= 0 ? (
+                  <Norecords />
                 ) : (
-                  sessionList?.map((el, key) => (
+                  modSessionList?.map((el, key) => (
                     <View style={styles.card} key={key}>
                       <View style={styles.row}>
                         <View>
@@ -94,9 +147,9 @@ export default function SessionList({ navigation }) {
                         <View>
                           <TouchableOpacity
                             style={commonStyle.smallBtn}
-                            onPress={() => deleteSession({ id: el.id })}
+                            onPress={() => ondelete(el.id)}
                           >
-                            <Ionicons name="md-close" size={20} color="white" />
+                            <Ionicons name="trash" size={20} color="white" />
                             <ButtonText>Delete</ButtonText>
                           </TouchableOpacity>
                         </View>
@@ -119,9 +172,9 @@ export default function SessionList({ navigation }) {
                               });
                             }}
                           >
-                            <Ionicons
-                              name="md-pencil"
-                              size={20}
+                            <FontAwesome5
+                              name="pencil-alt"
+                              size={16}
                               color="white"
                             />
                             <ButtonText>Edit</ButtonText>
@@ -132,7 +185,23 @@ export default function SessionList({ navigation }) {
                   ))
                 )}
               </View>
+              {showPopup ? (
+                <ConfirmPopup
+                  onConfirm={ondelete}
+                  showConfirm={showPopup}
+                  setModalVisible={setModalVisible}
+                />
+              ) : null}
             </ScrollView>
+          </View>
+          <View style={commonStyle.bottomButton}>
+            <TouchableOpacity
+              style={commonStyle.submitBtn}
+              onPress={() => navigation.navigate("Session Create")}
+            >
+              <Ionicons name="add" size={24} color="white" />
+              <ButtonText fontSize={18}>Create Session</ButtonText>
+            </TouchableOpacity>
           </View>
         </ScreenLayout>
       </ScreenContainer>
@@ -148,9 +217,9 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
-    width: 330,
-    height: 150,
+    borderRadius: 22,
+    width: halfWidth - 40,
+    minHeight: 140,
     margin: 10,
   },
   row: {

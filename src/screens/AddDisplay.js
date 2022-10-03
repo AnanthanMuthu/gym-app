@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -15,19 +15,29 @@ import { GREY, LIGHT_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
 import { Formik } from "formik";
 import gymServices from "../services/gymServices";
 import Picker from "../components/common/Picker";
-import { STATUS, TYPES } from "../constants/strings";
+import { REQUIRED_FILEDS, STATUS, TYPES } from "../constants/strings";
 import commonStyle from "./style/commonStyle";
 import { Ionicons } from "@expo/vector-icons";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  gym: yup.string().required(),
+  type: yup.string().required(),
+  status: yup.string().required(),
+});
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
 
 export default function AddDisplay({ navigation }) {
   const { addDisplay, getGymList, modGymList, isDisplayAdded } = gymServices();
+  const [userInfo, setUserInfo] = useState(null);
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, resetForm) => {
     console.log("Submit", values);
     addDisplay(values);
+    resetForm();
   };
 
   useEffect(() => {
@@ -36,10 +46,12 @@ export default function AddDisplay({ navigation }) {
 
   useEffect(() => {
     if (isDisplayAdded) {
-      navigation.navigate("Display");
+      const userInfo = `User Name : ${
+        isDisplayAdded?.username ?? ""
+      } Password : ${isDisplayAdded?.password ?? ""}`;
+      setUserInfo(userInfo);
     }
   }, [isDisplayAdded]);
-
   return (
     <SafeAreaProvider>
       <ScreenContainer
@@ -50,7 +62,8 @@ export default function AddDisplay({ navigation }) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={{ name: "", gym: "", type: "", status: "" }}
-            onSubmit={(values) => onSubmit(values)}
+            validationSchema={validationSchema}
+            onSubmit={(values, { resetForm }) => onSubmit(values, resetForm)}
           >
             {({
               handleChange,
@@ -58,9 +71,30 @@ export default function AddDisplay({ navigation }) {
               handleSubmit,
               setFieldValue,
               values,
+              isValid,
+              touched,
+              submitCount,
             }) => (
               <>
                 <View style={commonStyle.appContainer2}>
+                  {userInfo ? (
+                    <View style={commonStyle.success}>
+                      <Text
+                        fontSize={24}
+                        fontWeight="bold"
+                        lineHeight={25}
+                        textAlign="center"
+                        text="Successfully Created."
+                      />
+                      <Text
+                        fontSize={14}
+                        fontWeight="normal"
+                        lineHeight={20}
+                        textAlign="center"
+                        text={userInfo}
+                      />
+                    </View>
+                  ) : null}
                   <View style={commonStyle.card}>
                     <View style={styles.column}>
                       <Text
@@ -117,6 +151,14 @@ export default function AddDisplay({ navigation }) {
                         placeholder={{ label: "Select", value: 0, key: 0 }}
                         items={STATUS}
                       />
+                      {!isValid && touched && submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                     </View>
                   </View>
                 </View>
@@ -150,7 +192,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
+    borderRadius: 22,
     width: deviceWidth - 100,
     height: deviceHeight - 200,
     margin: 50,

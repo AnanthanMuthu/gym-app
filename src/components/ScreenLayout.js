@@ -115,7 +115,7 @@ ScreenLayout.defaultProps = {
   header: null,
   paddingBottom: 36,
   paddingHorizontal: 24,
-  paddingTop: 16,
+  marginTop: 16,
   useSafeArea: false,
   neverForceInset: null,
   scrollable: false,

@@ -1,24 +1,60 @@
-import React, { useEffect } from "react";
-import { Image, StyleSheet, View, Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, Dimensions, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
-import { ButtonText, Colors, StyledSmallButton } from "../components/styles";
+import { ButtonText, Colors, StyledButton } from "../components/styles";
 import ScreenContainer from "../components/ScreenContainer";
 import ScreenLayout from "../components/ScreenLayout";
 import { DARK_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import gymServices from "../services/gymServices";
+import ConfirmPopup from "../components/ConfirmPopup";
+import commonStyle from "./style/commonStyle";
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
 
 export default function ViewDisplayDetails({ navigation, route }) {
-  const { isDisplayDeleted, deleteDisplay } = gymServices();
+  const {
+    isDisplayDeleted,
+    deleteDisplay,
+    resetGymPassword,
+    isPasswordUpdated,
+  } = gymServices();
   useEffect(() => {
     if (isDisplayDeleted) {
       navigation.navigate("Display");
     }
   }, [isDisplayDeleted]);
+  //delete
+  const [showPopup, setShowPopup] = useState(false);
+  const [delleteId, setId] = useState(null);
+
+  const [passInfo, setPassInfo] = useState(null);
+  useEffect(() => {
+    if (isPasswordUpdated) {
+      setPassInfo(`Password : ${isPasswordUpdated?.password ?? ""}`);
+    }
+  }, [isPasswordUpdated]);
+  useEffect(() => {
+    return () => {
+      setPassInfo(false);
+    };
+  }, []);
+  const ondelete = (id) => {
+    console.log("### showPopup", showPopup);
+    setShowPopup(false);
+    if (id) {
+      setShowPopup(true);
+      setId(id);
+    } else {
+      deleteDisplay(delleteId);
+    }
+  };
+  const setModalVisible = () => {
+    setShowPopup(!showPopup);
+  };
+  //end
   const {
     params: { displayDetails },
   } = route;
@@ -32,6 +68,24 @@ export default function ViewDisplayDetails({ navigation, route }) {
         backgroundColor={MEDIUM_GREY}
       >
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
+          {passInfo ? (
+            <View style={commonStyle.success}>
+              <Text
+                fontSize={24}
+                fontWeight="bold"
+                lineHeight={25}
+                textAlign="center"
+                text="Password reset successfully."
+              />
+              <Text
+                fontSize={14}
+                fontWeight="normal"
+                lineHeight={20}
+                textAlign="center"
+                text={passInfo}
+              />
+            </View>
+          ) : null}
           <View style={styles.appContainer}>
             <View style={styles.card}>
               <View style={styles.row}>
@@ -120,39 +174,63 @@ export default function ViewDisplayDetails({ navigation, route }) {
                     text="Password"
                     color={DARK_GREY}
                   />
-                  <Text
-                    fontSize={14}
-                    fontWeight="bold"
-                    lineHeight={20}
-                    textAlign="left"
-                    text="Reset"
-                  />
+                  <TouchableOpacity
+                    onPress={() => resetGymPassword({ id: displayDetails.gym })}
+                    style={{ flexDirection: "row" }}
+                  >
+                    <MaterialCommunityIcons
+                      name="restart"
+                      size={22}
+                      color="#ae8f73"
+                    />
+
+                    <Text
+                      fontSize={18}
+                      fontWeight="bold"
+                      lineHeight={20}
+                      textAlign="left"
+                      color="#ae8f73"
+                      text="Reset"
+                      style={{ paddingLeft: 3 }}
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
 
               <View style={styles.row2}>
-                <StyledSmallButton
+                <StyledButton
                   onPress={() =>
-                    deleteDisplay({
+                    ondelete({
                       gym: displayDetails.gym,
                       displayid: displayDetails.id,
                     })
                   }
                 >
-                  <Ionicons name="md-close" size={20} color="white" />
-                  <ButtonText>Delete</ButtonText>
-                </StyledSmallButton>
-                <StyledSmallButton
+                  <Ionicons name="trash" size={20} color="white" />
+                  <ButtonText fontSize={18} fontWeight="normal">
+                    Delete
+                  </ButtonText>
+                </StyledButton>
+                <StyledButton
                   onPress={() =>
                     navigation.navigate("Schedule", {
                       selectedDisplay: displayDetails,
                     })
                   }
                 >
-                  <ButtonText>Schedule</ButtonText>
-                </StyledSmallButton>
+                  <ButtonText fontSize={18} fontWeight="normal">
+                    Schedule
+                  </ButtonText>
+                </StyledButton>
               </View>
             </View>
+            {showPopup ? (
+              <ConfirmPopup
+                onConfirm={ondelete}
+                showConfirm={showPopup}
+                setModalVisible={setModalVisible}
+              />
+            ) : null}
           </View>
         </ScreenLayout>
       </ScreenContainer>
@@ -162,7 +240,7 @@ export default function ViewDisplayDetails({ navigation, route }) {
 
 const styles = StyleSheet.create({
   appContainer: {
-    flex: 1,
+    flex: 7,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
@@ -171,10 +249,11 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   card: {
+    justifyContent: "center",
     backgroundColor: WHITE,
-    borderRadius: 10,
-    width: deviceWidth - 100,
-    height: deviceHeight - 200,
+    borderRadius: 22,
+    width: deviceWidth - 220,
+    height: deviceHeight - 500,
     margin: 10,
     padding: 20,
   },
@@ -187,7 +266,7 @@ const styles = StyleSheet.create({
   row2: {
     flexDirection: "row",
     padding: 10,
-    justifyContent: "space-evenly",
+    justifyContent: "flex-start",
     marginVertical: 20,
   },
   icon: {

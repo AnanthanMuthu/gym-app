@@ -3,7 +3,7 @@
     "name": "gym-app",
     "slug": "gym-app",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -25,7 +25,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.ananthan209.gymapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

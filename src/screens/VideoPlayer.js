@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Image, StyleSheet, StatusBar } from "react-native";
+import { Dimensions, Image, StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Vimeo } from "react-native-vimeo-iframe";
 import ScreenContainer from "../components/ScreenContainer";
 import ScreenLayout from "../components/ScreenLayout";
 import DisplayTimer from "../components/DisplayTimer";
-import { BLACK, MEDIUM_GREY } from "../constants/colors";
+import { BLACK } from "../constants/colors";
 import gymServices from "../services/gymServices";
+import { dateCheck, formatDate } from "./helper";
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
 let i = 0;
+const logoImage = require("./../assets/login_bg.jpg");
+
 const VideoPlayer = (props) => {
   const {
     scheduleDisplayList,
@@ -23,14 +26,39 @@ const VideoPlayer = (props) => {
   const [totalDurationFromList, setTotalDuration] = useState(0);
 
   useEffect(() => {
-    StatusBar.setBackgroundColor("#FF573300");
-    StatusBar.setTranslucent(true);
-    getScheduleDisplay({ sdate: "25-07-2022" });
-    getScheduleDisplayList({ scheduleid: 110 });
+    console.log("### player props", props);
+    const date = props?.route?.params?.date
+      ? new Date(props?.route?.params?.date)
+      : new Date();
+    getScheduleDisplay({
+      display: props?.route?.params?.displayid,
+      sdate: formatDate(date),
+    });
   }, []);
 
   useEffect(() => {
-    console.log("### scheduleDisplay", scheduleDisplay);
+    if (scheduleDisplay?.length > 0) {
+      console.log("### scheduleDisplay", scheduleDisplay);
+      scheduleDisplay.forEach((el) => {
+        const isCurrent = dateCheck(
+          new Date(el.sdatetime).toISOString(),
+          new Date(el.edatetime).toISOString(),
+          new Date().toISOString()
+        );
+        console.log(
+          "### isCurrent",
+          isCurrent,
+          new Date(el.sdatetime).toISOString(),
+          new Date(el.edatetime).toISOString(),
+          new Date().toISOString()
+        );
+        if (isCurrent) {
+          getScheduleDisplayList({
+            scheduleid: el.scheduleid,
+          });
+        }
+      });
+    }
   }, [scheduleDisplay]);
 
   function add(accumulator, a) {
@@ -74,7 +102,7 @@ const VideoPlayer = (props) => {
 
   return (
     <SafeAreaProvider>
-      <ScreenContainer backgroundColor={BLACK}>
+      <ScreenContainer backgroundType="color" backgroundColor={BLACK}>
         <ScreenLayout>
           {playItem?.duration ? (
             <DisplayTimer
@@ -98,7 +126,13 @@ const VideoPlayer = (props) => {
               handlers={videoCallbacks}
               style={styles.video}
             />
-          ) : null}
+          ) : (
+            <Image
+              style={styles.uploadedImage}
+              source={logoImage}
+              resizeMode="stretch"
+            />
+          )}
         </ScreenLayout>
       </ScreenContainer>
     </SafeAreaProvider>

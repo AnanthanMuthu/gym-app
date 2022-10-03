@@ -1,21 +1,80 @@
-import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
-import { ButtonText, StyledSmallButton } from "../components/styles";
+import { ButtonText, Colors, StyledSmallButton } from "../components/styles";
 import ScreenContainer from "../components/ScreenContainer";
 import ScreenLayout from "../components/ScreenLayout";
 import { BLACK, DARK_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import gymServices from "../services/gymServices";
 import commonStyle from "./style/commonStyle";
+import Norecords from "../components/common/Norecords";
+import ConfirmPopup from "../components/ConfirmPopup";
+
+const deviceHeight = Dimensions.get("window").height;
+const deviceWidth = Dimensions.get("window").width;
+const halfWidth = deviceWidth / 2;
 
 export default function PlayList({ navigation }) {
-  const { getPlayList, playList, deletePlay } = gymServices();
+  const { getPlayList, playList, deletePlay, playErrorMsg } = gymServices();
   useEffect(() => {
     getPlayList();
   }, []);
+  const [searchText, setSearchText] = useState("");
+  const [modplayList, setplayList] = useState([]);
+  const [showError, setError] = useState(false);
+  const { darkLight } = Colors;
 
+  //delete
+  const [showPopup, setShowPopup] = useState(false);
+  const [delleteId, setId] = useState(null);
+  const ondelete = (id) => {
+    console.log("### showPopup", showPopup);
+    setShowPopup(false);
+    if (id) {
+      setShowPopup(true);
+      setId(id);
+    } else {
+      deletePlay({ id: delleteId });
+    }
+  };
+  const setModalVisible = () => {
+    setShowPopup(!showPopup);
+  };
+  //end
+
+  useEffect(() => {
+    setplayList(playList);
+  }, [playList]);
+  console.log("### playErrorMsg", playErrorMsg);
+  useEffect(() => {
+    if (playErrorMsg) setError(true);
+    setTimeout(() => {
+      setError(false);
+    }, 30000);
+  }, [playErrorMsg]);
+
+  const handleTextChange = (text) => {
+    setSearchText(text);
+    console.log("### text", text);
+    const temp = text
+      ? playList?.filter((el) => {
+          const name = el?.name?.toLowerCase();
+          const tempText = text?.toLowerCase();
+
+          return name?.includes(tempText);
+        })
+      : [];
+    setplayList(text ? temp : playList);
+  };
   return (
     <SafeAreaProvider>
       <ScreenContainer
@@ -26,22 +85,56 @@ export default function PlayList({ navigation }) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <View style={commonStyle.appContainer}>
             <ScrollView>
-              <View style={commonStyle.cardHead}>
-                {playList?.length <= 0 ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 20,
+                  marginLeft: 20,
+                }}
+              >
+                <TextInput
+                  placeholder="Search Category"
+                  placeholderTextColor={darkLight}
+                  value={searchText}
+                  onChangeText={handleTextChange}
+                  keyboardType="email-address"
+                  style={commonStyle.constantInput2}
+                />
+                <TouchableOpacity
+                  style={{
+                    position: "absolute",
+                    zIndex: 1,
+                    right: 50,
+                    top: 52,
+                  }}
+                  onPress={() => handleTextChange(searchText)}
+                >
+                  <Ionicons name="search" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+              {showError ? (
+                <View style={commonStyle.error}>
                   <Text
-                    fontSize={14}
-                    lineHeight={60}
-                    style={commonStyle.noRecords}
-                    color={WHITE}
-                    text="No Records found"
+                    fontSize={20}
+                    fontWeight="bold"
+                    lineHeight={25}
+                    textAlign="center"
+                    text="Please play remove from session!"
                   />
+                </View>
+              ) : null}
+              <View style={commonStyle.cardHead}>
+                {modplayList?.length <= 0 ? (
+                  <Norecords />
                 ) : (
-                  playList?.map((el, key) => (
+                  modplayList?.map((el, key) => (
                     <TouchableOpacity style={styles.card} key={key}>
                       <View style={styles.row}>
                         <View style={styles.categoryName}>
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
@@ -53,7 +146,7 @@ export default function PlayList({ navigation }) {
                       <View style={styles.row}>
                         <View style={styles.firstItem}>
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
@@ -61,17 +154,17 @@ export default function PlayList({ navigation }) {
                             color={DARK_GREY}
                           />
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="bold"
                             lineHeight={20}
                             textAlign="left"
                             color={BLACK}
-                            text={el.id}
+                            text={String(el?.id ?? "")}
                           />
                         </View>
                         <View>
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
@@ -79,7 +172,7 @@ export default function PlayList({ navigation }) {
                             color={DARK_GREY}
                           />
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="bold"
                             lineHeight={20}
                             textAlign="left"
@@ -91,7 +184,7 @@ export default function PlayList({ navigation }) {
                       <View style={styles.row}>
                         <View style={styles.firstItem}>
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
@@ -99,7 +192,7 @@ export default function PlayList({ navigation }) {
                             color={DARK_GREY}
                           />
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="bold"
                             lineHeight={20}
                             textAlign="left"
@@ -109,7 +202,7 @@ export default function PlayList({ navigation }) {
                         </View>
                         <View>
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
@@ -117,19 +210,19 @@ export default function PlayList({ navigation }) {
                             color={DARK_GREY}
                           />
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="bold"
                             lineHeight={20}
                             textAlign="left"
-                            color={BLACK}
-                            text="Active"
+                            color={el.status === 1 ? "green" : "red"}
+                            text={el.status === 1 ? "Active" : "Inactive"}
                           />
                         </View>
                       </View>
                       <View style={styles.row}>
-                        <View style={styles.firstItem}>
+                        <View style={styles.firstItem2}>
                           <Text
-                            fontSize={14}
+                            fontSize={13}
                             fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
@@ -137,8 +230,8 @@ export default function PlayList({ navigation }) {
                             color={DARK_GREY}
                           />
                           <Text
-                            fontSize={14}
-                            fontWeight="bold"
+                            fontSize={13}
+                            fontWeight="normal"
                             lineHeight={20}
                             textAlign="left"
                             color={BLACK}
@@ -155,13 +248,15 @@ export default function PlayList({ navigation }) {
                             });
                           }}
                         >
-                          <Ionicons name="md-pencil" size={20} color="white" />
+                          <FontAwesome5
+                            name="pencil-alt"
+                            size={12}
+                            color="white"
+                          />
                           <ButtonText>Edit</ButtonText>
                         </StyledSmallButton>
-                        <StyledSmallButton
-                          onPress={() => deletePlay({ id: el.id })}
-                        >
-                          <Ionicons name="md-close" size={20} color="white" />
+                        <StyledSmallButton onPress={() => ondelete(el.id)}>
+                          <Ionicons name="trash" size={20} color="white" />
                           <ButtonText>Delete</ButtonText>
                         </StyledSmallButton>
                       </View>
@@ -180,6 +275,13 @@ export default function PlayList({ navigation }) {
               <ButtonText>Add Play</ButtonText>
             </TouchableOpacity>
           </View>
+          {showPopup ? (
+            <ConfirmPopup
+              onConfirm={ondelete}
+              showConfirm={showPopup}
+              setModalVisible={setModalVisible}
+            />
+          ) : null}
         </ScreenLayout>
       </ScreenContainer>
     </SafeAreaProvider>
@@ -198,9 +300,9 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
-    width: 330,
-    height: 290,
+    borderRadius: 22,
+    width: halfWidth - 40,
+    height: 310,
     margin: 10,
     padding: 5,
   },
@@ -214,12 +316,19 @@ const styles = StyleSheet.create({
     height: 15,
   },
   categoryName: {
-    padding: 5,
     justifyContent: "flex-start",
     fontWeight: "bold",
+    backgroundColor: Colors.secondaryLight,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 7,
+    maxWidth: halfWidth - 140,
   },
   firstItem: {
     width: 180,
+    paddingLeft: 10,
+  },
+  firstItem2: {
     paddingLeft: 10,
   },
 });

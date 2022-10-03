@@ -1,6 +1,5 @@
-//import styled from 'styled-components';
 import styled from "styled-components/native";
-//import Constants from 'expo-constants';
+import { RFValue } from "react-native-responsive-fontsize";
 
 // Colors
 export const Colors = {
@@ -65,7 +64,7 @@ export const PageTitle = styled.Text`
   font-weight: bold;
   color: ${brand};
   padding: 10px;
-
+  font-family: "Montserrat-Regular";
   ${(props) =>
     props.welcome &&
     `
@@ -79,6 +78,7 @@ export const SubTitle = styled.Text`
   letter-spacing: 1px;
   font-weight: bold;
   color: ${tertiary};
+  font-family: "Montserrat-Regular";
 
   ${(props) =>
     props.welcome &&
@@ -103,6 +103,7 @@ export const StyledTextInput = styled.TextInput`
   height: 60px;
   margin-vertical: 3px;
   margin-bottom: 10px;
+  font-family: "Montserrat-Regular";
   color: ${tertiary};
 `;
 
@@ -110,6 +111,7 @@ export const StyledInputLabel = styled.Text`
   color: ${tertiary};
   font-size: 13px;
   text-align: left;
+  font-family: "Montserrat-Regular";
 `;
 
 export const LeftIcon = styled.View`
@@ -127,29 +129,39 @@ export const RightIcon = styled.TouchableOpacity`
 `;
 
 export const StyledButton = styled.TouchableOpacity`
+  flex-direction: row;
   padding: 15px;
-  background-color: ${black};
+  background-color: ${secondary};
   color:${primary}
   justify-content: center;
   align-items: center;
-  border-radius: 20px;
   margin-top: 20px;
+  margin-right: 10px;
   height: 50px;
-  width: 400px;
+  width: 200px;
   font-weight : bold;
-
+  border-radius: 10px;
+  
+  ${(props) =>
+    props.round == true &&
+    `  border-radius: 20px;
+    `}
+  ${(props) =>
+    props.width &&
+    `  width: ${props.width}px;
+    `}
   ${(props) =>
     props.google == true &&
-    `
+    ` flex-direction: row;
       background-color: ${green};
-      flex-direction: row;
       justify-content: center;
     `}
 `;
 export const StyledSmallButton = styled.TouchableOpacity`
   flex-direction:row;
   margin-right: 10px;
-  padding: 5px;
+  padding-horizontal: 10px;
+  padding-vertical: 5px;
   background-color: ${secondary};
   color:${primary}
   justify-content: center;
@@ -167,18 +179,25 @@ export const StyledSmallButton = styled.TouchableOpacity`
 
 export const ButtonText = styled.Text`
   color: ${primary};
-  font-size: 16px;
-
+  font-weight: bold;
+  padding-left: 5px;
+  font-family: "Montserrat-Bold";
+  ${(props) =>
+    props.fontSize &&
+    `
+  font-size: ${props.fontSize}px;
+    `};
   ${(props) =>
     props.google == true &&
     `
-    padding-right: 10px;
-    `}
+    padding-right: 15px;
+    `};
 `;
 
 export const MsgBox = styled.Text`
   text-align: center;
   font-size: 13px;
+  font-family: "Montserrat-Regular";
   color: ${(props) => (props.type == "SUCCESS" ? green : red)};
 `;
 
@@ -201,6 +220,7 @@ export const ExtraText = styled.Text`
   align-content: center;
   color: ${tertiary};
   font-size: 15px;
+  font-family: "Montserrat-Regular";
 `;
 
 export const TextLink = styled.TouchableOpacity`
@@ -211,4 +231,5 @@ export const TextLink = styled.TouchableOpacity`
 export const TextLinkContent = styled.Text`
   color: ${brand};
   font-size: 15px;
+  font-family: "Montserrat-Regular";
 `;

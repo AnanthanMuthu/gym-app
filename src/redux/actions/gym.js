@@ -131,6 +131,13 @@ export const setGymUpdate = (data) => ({
   payload: data,
 });
 
+export const UPDATE_PASSWORD_GYM = "UPDATE_PASSWORD_GYM";
+
+export const setGymPasswordUpdate = (data) => ({
+  type: UPDATE_PASSWORD_GYM,
+  payload: data,
+});
+
 export const DELETE_GYM = "DELETE_GYM";
 
 export const setGymDeleted = (data) => ({
@@ -205,5 +212,12 @@ export const SET_SCHEDULE_ADDED = "SET_SCHEDULE_ADDED";
 
 export const setScheduleAdded = (data) => ({
   type: SET_SCHEDULE_ADDED,
+  payload: data,
+});
+
+export const PLAY_DELETE_MSG = "PLAY_DELETE_MSG";
+
+export const setPlayMsg = (data) => ({
+  type: PLAY_DELETE_MSG,
   payload: data,
 });

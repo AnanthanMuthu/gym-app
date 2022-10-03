@@ -9,10 +9,15 @@ import { GREY, LIGHT_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
 import { Formik } from "formik";
 import gymServices from "../services/gymServices";
 import Picker from "../components/common/Picker";
-import { STATUS } from "../constants/strings";
+import { REQUIRED_FILEDS, STATUS } from "../constants/strings";
 import commonStyle from "./style/commonStyle";
 import DraggableList from "../components/DraggableList";
+import * as yup from "yup";
 
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  status: yup.string().required(),
+});
 export default function AddSession(props) {
   const { categoryList, catPlayList, addSession, isSessionAdded } =
     gymServices();
@@ -25,7 +30,9 @@ export default function AddSession(props) {
   const onSubmit = async (values) => {
     const formValues = { ...values, playlist: dataList };
     console.log("Submit", values, formValues);
-    addSession(formValues);
+    if (dataList?.length > 0) {
+      addSession(formValues);
+    }
   };
 
   useEffect(() => {
@@ -78,6 +85,7 @@ export default function AddSession(props) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={{ name: "", status: "" }}
+            validationSchema={validationSchema}
             onSubmit={(values) => onSubmit(values)}
           >
             {({
@@ -86,10 +94,11 @@ export default function AddSession(props) {
               handleSubmit,
               setFieldValue,
               values,
+              isValid,
+              touched,
+              submitCount,
             }) => (
               <>
-                {/* <View style={commonStyle.appContainer3}>
-                  <View style={commonStyle.card2}> */}
                 <View style={styles.column}>
                   <Text
                     fontSize={14}
@@ -142,6 +151,16 @@ export default function AddSession(props) {
                       }}
                       items={STATUS}
                     />
+                    {(dataList?.length === 0 || !isValid) &&
+                      touched &&
+                      submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                   </View>
                   <View style={commonStyle.bottomButton}>
                     <TouchableOpacity

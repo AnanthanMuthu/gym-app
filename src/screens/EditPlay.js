@@ -17,9 +17,19 @@ import gymServices from "../services/gymServices";
 import * as DocumentPicker from "expo-document-picker";
 import commonStyle from "./style/commonStyle";
 import { Ionicons } from "@expo/vector-icons";
-import { FILE_TYPES, STATUS } from "../constants/strings";
+import { FILE_TYPES, REQUIRED_FILEDS, STATUS } from "../constants/strings";
 import Picker from "../components/common/Picker";
+import * as yup from "yup";
 
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  category: yup.string().required(),
+  description: yup.string().required(),
+  duration: yup.string().required(),
+  type: yup.number().required(),
+  content: yup.string().required(),
+  status: yup.string().required(),
+});
 export default function EditPlay(props) {
   const { getCategoryList, modCategoryList, updatePlay, isPlayUpdated } =
     gymServices();
@@ -30,6 +40,7 @@ export default function EditPlay(props) {
       params: { playDetails },
     },
   } = props;
+  const [showInfo, setShowInfo] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -45,7 +56,8 @@ export default function EditPlay(props) {
   };
   useEffect(() => {
     if (isPlayUpdated) {
-      navigation.navigate("Plays");
+      // navigation.navigate("Plays");
+      setShowInfo(true);
     }
   }, [isPlayUpdated]);
   useEffect(() => {
@@ -102,6 +114,7 @@ export default function EditPlay(props) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={formData}
+            validationSchema={validationSchema}
             onSubmit={(values) => onSubmit(values)}
             enableReinitialize={true}
           >
@@ -111,169 +124,193 @@ export default function EditPlay(props) {
               handleSubmit,
               setFieldValue,
               values,
-            }) => (
-              <>
-                <View style={commonStyle.appContainer2}>
-                  <View style={commonStyle.card}>
-                    <View style={styles.column}>
-                      <Text
-                        fontSize={14}
-                        fontWeight="normal"
-                        lineHeight={20}
-                        textAlign="left"
-                        text="Name"
-                      />
-                      <TextInput
-                        onChangeText={handleChange("name")}
-                        onBlur={handleBlur("name")}
-                        value={values.name}
-                        style={commonStyle.input}
-                      />
-                      <Text
-                        fontSize={14}
-                        fontWeight="normal"
-                        lineHeight={20}
-                        textAlign="left"
-                        text="Description"
-                      />
-                      <TextInput
-                        onChangeText={handleChange("description")}
-                        onBlur={handleBlur("description")}
-                        value={values.description}
-                        style={commonStyle.input}
-                      />
-                      <Text
-                        fontSize={14}
-                        fontWeight="normal"
-                        lineHeight={20}
-                        textAlign="left"
-                        text="Category"
-                      />
-                      <Picker
-                        value={values.category}
-                        onValueChange={(value) =>
-                          setFieldValue("category", value)
-                        }
-                        placeholder={{
-                          label: "Select Category",
-                          value: "",
-                          key: "",
-                        }}
-                        items={modCategoryList}
-                      />
-                      <Text
-                        fontSize={14}
-                        fontWeight="normal"
-                        lineHeight={20}
-                        textAlign="left"
-                        text="Status"
-                      />
-                      <Picker
-                        value={values.status}
-                        onValueChange={(value) =>
-                          setFieldValue("status", value)
-                        }
-                        placeholder={{
-                          label: "Select Status",
-                          value: "",
-                          key: "",
-                        }}
-                        items={STATUS}
-                      />
-                      <Text
-                        fontSize={14}
-                        fontWeight="normal"
-                        lineHeight={20}
-                        textAlign="left"
-                        text="Duration"
-                      />
-                      <TextInput
-                        onChangeText={handleChange("duration")}
-                        onBlur={handleBlur("duration")}
-                        value={values.duration}
-                        style={commonStyle.input}
-                      />
+              isValid,
+              touched,
+              submitCount,
+              errors,
+            }) => {
+              console.log("### error", errors);
+              return (
+                <>
+                  <View style={commonStyle.appContainer2}>
+                    {showInfo ? (
+                      <View style={commonStyle.success}>
+                        <Text
+                          fontSize={24}
+                          fontWeight="bold"
+                          lineHeight={25}
+                          textAlign="center"
+                          text="Successfully Updated."
+                        />
+                      </View>
+                    ) : null}
+                    <View style={commonStyle.card}>
+                      <View style={styles.column}>
+                        <Text
+                          fontSize={14}
+                          fontWeight="normal"
+                          lineHeight={20}
+                          textAlign="left"
+                          text="Name"
+                        />
+                        <TextInput
+                          onChangeText={handleChange("name")}
+                          onBlur={handleBlur("name")}
+                          value={values.name}
+                          style={commonStyle.input}
+                        />
+                        <Text
+                          fontSize={14}
+                          fontWeight="normal"
+                          lineHeight={20}
+                          textAlign="left"
+                          text="Description"
+                        />
+                        <TextInput
+                          onChangeText={handleChange("description")}
+                          onBlur={handleBlur("description")}
+                          value={values.description}
+                          style={commonStyle.input}
+                        />
+                        <Text
+                          fontSize={14}
+                          fontWeight="normal"
+                          lineHeight={20}
+                          textAlign="left"
+                          text="Category"
+                        />
+                        <Picker
+                          value={values.catid}
+                          onValueChange={(value) =>
+                            setFieldValue("category", value)
+                          }
+                          placeholder={{
+                            label: "Select Category",
+                            value: "",
+                            key: "",
+                          }}
+                          items={modCategoryList}
+                        />
+                        <Text
+                          fontSize={14}
+                          fontWeight="normal"
+                          lineHeight={20}
+                          textAlign="left"
+                          text="Status"
+                        />
+                        <Picker
+                          value={values.status}
+                          onValueChange={(value) =>
+                            setFieldValue("status", value)
+                          }
+                          placeholder={{
+                            label: "Select Status",
+                            value: "",
+                            key: "",
+                          }}
+                          items={STATUS}
+                        />
+                        <Text
+                          fontSize={14}
+                          fontWeight="normal"
+                          lineHeight={20}
+                          textAlign="left"
+                          text="Duration(Seconds)"
+                        />
+                        <TextInput
+                          onChangeText={handleChange("duration")}
+                          onBlur={handleBlur("duration")}
+                          value={values.duration}
+                          style={commonStyle.input}
+                        />
 
-                      <Text
-                        fontSize={14}
-                        fontWeight="normal"
-                        lineHeight={20}
-                        textAlign="left"
-                        text="File Type"
-                      />
-                      <Picker
-                        value={values.type}
-                        onValueChange={(value) => setFieldValue("type", value)}
-                        placeholder={{
-                          label: "Select File Type",
-                          value: "",
-                          key: "",
-                        }}
-                        items={FILE_TYPES}
-                      />
-                      {values.type === 3 ? (
-                        <View style={commonStyle.attachButton}>
-                          <TouchableOpacity
-                            style={commonStyle.fileBtn}
-                            onPress={() => pickDocument(setFieldValue)}
-                          >
-                            <ButtonText>Attach file</ButtonText>
-                            <Ionicons
-                              name="md-attach-outline"
-                              size={20}
-                              color="white"
+                        <Text
+                          fontSize={14}
+                          fontWeight="normal"
+                          lineHeight={20}
+                          textAlign="left"
+                          text="File Type"
+                        />
+                        <Picker
+                          value={values.type}
+                          onValueChange={(value) =>
+                            setFieldValue("type", value)
+                          }
+                          placeholder={{
+                            label: "Select File Type",
+                            value: "",
+                            key: "",
+                          }}
+                          items={FILE_TYPES}
+                        />
+                        {values.type === 3 ? (
+                          <View style={commonStyle.attachButton}>
+                            <TouchableOpacity
+                              style={commonStyle.fileBtn}
+                              onPress={() => pickDocument(setFieldValue)}
+                            >
+                              <ButtonText>Attach file</ButtonText>
+                              <Ionicons
+                                name="md-attach-outline"
+                                size={20}
+                                color="white"
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        ) : values.type === 1 ? (
+                          <>
+                            <Text
+                              fontSize={14}
+                              fontWeight="normal"
+                              lineHeight={20}
+                              textAlign="left"
+                              text="Video URL"
                             />
-                          </TouchableOpacity>
-                        </View>
-                      ) : values.type === 1 ? (
-                        <>
-                          <Text
-                            fontSize={14}
-                            fontWeight="normal"
-                            lineHeight={20}
-                            textAlign="left"
-                            text="Video URL"
-                          />
-                          <TextInput
-                            onChangeText={handleChange("content")}
-                            onBlur={handleBlur("content")}
-                            value={values.content}
-                            style={commonStyle.input}
-                          />
-                        </>
-                      ) : null}
+                            <TextInput
+                              onChangeText={handleChange("content")}
+                              onBlur={handleBlur("content")}
+                              value={values.content}
+                              style={commonStyle.input}
+                            />
+                          </>
+                        ) : null}
 
-                      {values?.imgfiles || values?.content ? (
-                        <View style={styles.file}>
-                          <Image
-                            style={styles.uploadedImage}
-                            source={{
-                              uri: values?.content,
-                            }}
-                            resizeMode="contain"
+                        {values.type === 3 &&
+                        (values?.imgfiles || values?.content) ? (
+                          <View style={styles.file}>
+                            <Image
+                              style={styles.uploadedImage}
+                              source={{
+                                uri: values?.content,
+                              }}
+                              resizeMode="contain"
+                            />
+                          </View>
+                        ) : null}
+                      </View>
+                      {!isValid && touched && submitCount > 0 && (
+                        <View style={{ marginTop: 10 }}>
+                          <Text
+                            fontSize={16}
+                            color="red"
+                            text={REQUIRED_FILEDS}
+                            textAlign="center"
                           />
-                          {/* <Text
-                            fontSize={14}
-                            fontWeight="normal"
-                            lineHeight={20}
-                            textAlign="left"
-                            text={values?.content}
-                          /> */}
                         </View>
-                      ) : null}
+                      )}
                     </View>
                   </View>
-                </View>
-                <View style={commonStyle.bottomButton}>
-                  <TouchableOpacity
-                    style={commonStyle.submitBtn}
-                    onPress={handleSubmit}
-                  >
-                    <ButtonText>SUBMIT</ButtonText>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
+                  <View style={commonStyle.bottomButton}>
+                    <TouchableOpacity
+                      style={commonStyle.submitBtn}
+                      onPress={handleSubmit}
+                    >
+                      <ButtonText>SUBMIT</ButtonText>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              );
+            }}
           </Formik>
         </ScreenLayout>
       </ScreenContainer>

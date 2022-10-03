@@ -9,9 +9,15 @@ import { GREY, LIGHT_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
 import { Formik } from "formik";
 import gymServices from "../services/gymServices";
 import Picker from "../components/common/Picker";
-import { STATUS } from "../constants/strings";
+import { REQUIRED_FILEDS, STATUS } from "../constants/strings";
 import commonStyle from "./style/commonStyle";
 import DraggableList from "../components/DraggableList";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  status: yup.string().required(),
+});
 
 export default function EditSession(props) {
   const {
@@ -32,7 +38,9 @@ export default function EditSession(props) {
   const onSubmit = async (values) => {
     const formValues = { ...values, sessionid: values.id, playlist: dataList };
     console.log("Submit", values, formValues);
-    updateSession(formValues);
+    if (dataList?.length > 0) {
+      updateSession(formValues);
+    }
   };
 
   useEffect(() => {
@@ -92,6 +100,7 @@ export default function EditSession(props) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={{ ...params.sessionDetails }}
+            validationSchema={validationSchema}
             onSubmit={(values) => onSubmit(values)}
           >
             {({
@@ -100,6 +109,9 @@ export default function EditSession(props) {
               handleSubmit,
               setFieldValue,
               values,
+              isValid,
+              touched,
+              submitCount,
             }) => (
               <>
                 <View style={styles.column}>
@@ -154,6 +166,16 @@ export default function EditSession(props) {
                       }}
                       items={STATUS}
                     />
+                    {(dataList?.length === 0 || !isValid) &&
+                      touched &&
+                      submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                   </View>
                   <View style={commonStyle.bottomButton}>
                     <TouchableOpacity

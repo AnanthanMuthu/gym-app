@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -44,8 +44,11 @@ function ScheduleListChild(props) {
     return foundType?.name ?? "";
   }
 
-  const onItemPress = (id) => {
-    navigation.navigate("     ", { scheduleId: id });
+  const onItemPress = (item) => {
+    navigation.navigate("     ", {
+      date: item.sdatetime,
+      displayid: item.displayid,
+    });
   };
 
   const renderItem = (item, index) => {
@@ -53,7 +56,7 @@ function ScheduleListChild(props) {
       <TouchableOpacity
         style={styles.item}
         key={index}
-        onPress={() => onItemPress(item.sessions)}
+        onPress={() => onItemPress(item)}
       >
         <View style={styles.item_children}>
           <View style={styles.childItem2}>
@@ -75,7 +78,7 @@ function ScheduleListChild(props) {
             fontWeight="normal"
             lineHeight={20}
             textAlign="left"
-            text={getSessionName(item.sessions)}
+            text={item.displayname}
             color="black"
           />
           {user?.type === 1 ? (

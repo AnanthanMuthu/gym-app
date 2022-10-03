@@ -11,8 +11,16 @@ import Picker from "../components/common/Picker";
 import commonStyle from "./style/commonStyle";
 import Text from "../components/common/Text";
 import CheckBox from "expo-checkbox";
-import { checkboxData } from "../constants/strings";
+import { checkboxData, REQUIRED_FILEDS } from "../constants/strings";
 import DatePicker from "react-native-datepicker";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  sessionid: yup.string().required(),
+  display: yup.string().required(),
+  time: yup.string().required(),
+  sdate: yup.string().required(),
+});
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
@@ -25,13 +33,15 @@ export default function AssignScheduleModule(props) {
     assignSchedule,
     displayModList,
     isScheduleAdded,
+    modGymList,
   } = gymServices();
   const [daysList, setDaysList] = useState(checkboxData);
+  const [gymData, setGymData] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   const { navigation, route } = props;
 
   const onSubmit = async (values) => {
-    console.log("Submit", values, daysList);
     const selectedDays = [];
     daysList.forEach((el) => {
       if (el.isChecked) {
@@ -39,20 +49,26 @@ export default function AssignScheduleModule(props) {
       }
     });
     values.days = selectedDays?.join(",") ? selectedDays.join(",") : "";
-    values.gym = route?.params?.gymData ?? "";
-    console.log("values", values, route?.params);
+    values.gym = gymData;
+    console.log("Submit", values, daysList);
     assignSchedule(values);
   };
 
   useEffect(() => {
     getSessionList();
-    getDisplayList();
+    // getDisplayList();
   }, []);
   useEffect(() => {
     if (isScheduleAdded) {
-      navigation.navigate(route?.params?.routeFrom);
+      // navigation.navigate(route?.params?.routeFrom);
+      setShowInfo(true);
     }
   }, [isScheduleAdded]);
+
+  function setGym(gym) {
+    setGymData(gym);
+    getDisplayList(gym);
+  }
 
   const handleChange = (id) => {
     console.log("### id", id, checkboxData);
@@ -73,10 +89,32 @@ export default function AssignScheduleModule(props) {
         backgroundColor={MEDIUM_GREY}
       >
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
-          <Formik initialValues={{}} onSubmit={(values) => onSubmit(values)}>
-            {({ handleSubmit, setFieldValue, values }) => (
+          <Formik
+            initialValues={{}}
+            validationSchema={validationSchema}
+            onSubmit={(values) => onSubmit(values)}
+          >
+            {({
+              handleSubmit,
+              setFieldValue,
+              values,
+              isValid,
+              touched,
+              submitCount,
+            }) => (
               <>
                 <View style={commonStyle.appContainer2}>
+                  {showInfo ? (
+                    <View style={commonStyle.success}>
+                      <Text
+                        fontSize={24}
+                        fontWeight="bold"
+                        lineHeight={25}
+                        textAlign="center"
+                        text="Schedule Assigned."
+                      />
+                    </View>
+                  ) : null}
                   <View style={commonStyle.card}>
                     <View style={styles.column}>
                       <Text
@@ -84,19 +122,17 @@ export default function AssignScheduleModule(props) {
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
-                        text="Session"
+                        text="Gym"
                       />
                       <Picker
-                        value={values.sessionid}
-                        onValueChange={(value) =>
-                          setFieldValue("sessionid", value)
-                        }
+                        value={values.gym}
+                        onValueChange={setGym}
                         placeholder={{
-                          label: "Select Session",
-                          value: null,
-                          key: null,
+                          label: "Select Gym",
+                          value: "",
+                          key: "",
                         }}
-                        items={sessionModList ?? []}
+                        items={modGymList ?? []}
                       />
                       <Text
                         fontSize={14}
@@ -116,6 +152,25 @@ export default function AssignScheduleModule(props) {
                           key: null,
                         }}
                         items={displayModList ?? []}
+                      />
+                      <Text
+                        fontSize={14}
+                        fontWeight="normal"
+                        lineHeight={20}
+                        textAlign="left"
+                        text="Session"
+                      />
+                      <Picker
+                        value={values.sessionid}
+                        onValueChange={(value) =>
+                          setFieldValue("sessionid", value)
+                        }
+                        placeholder={{
+                          label: "Select Session",
+                          value: null,
+                          key: null,
+                        }}
+                        items={sessionModList ?? []}
                       />
                       <Text
                         fontSize={14}
@@ -199,6 +254,14 @@ export default function AssignScheduleModule(props) {
                           </View>
                         ))}
                       </View>
+                      {!isValid && touched && submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                     </View>
                   </View>
                 </View>
@@ -239,9 +302,9 @@ const styles = StyleSheet.create({
   },
   column: {
     flexDirection: "column",
-    padding: 10,
+    paddingHorizontal: 60,
     justifyContent: "space-between",
-    marginVertical: 20,
+    // marginVertical: 20,
   },
   row2: {
     flexDirection: "row",
@@ -268,6 +331,7 @@ const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: "column",
     marginBottom: 20,
+    paddingLeft: 20,
   },
   checkbox: {
     alignSelf: "center",

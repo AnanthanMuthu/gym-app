@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,34 +8,54 @@ import {
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
-import { ButtonText, Colors, StyledButton } from "../components/styles";
+import { ButtonText, Colors } from "../components/styles";
 import ScreenContainer from "../components/ScreenContainer";
 import ScreenLayout from "../components/ScreenLayout";
 import { GREY, LIGHT_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
 import { Formik } from "formik";
 import gymServices from "../services/gymServices";
-import { STATUS } from "../constants/strings";
+import { REQUIRED_FILEDS, STATUS } from "../constants/strings";
 import commonStyle from "./style/commonStyle";
 import Picker from "../components/common/Picker";
 import { Ionicons } from "@expo/vector-icons";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  status: yup.string().required(),
+});
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
 
 export default function EditCategory(props) {
-  const { updateCategory, isCategoryUpdated } = gymServices();
+  const { updateCategory, isCategoryUpdated, categoryList } = gymServices();
   const {
     navigation,
     route: {
       params: { categoryDetails },
     },
   } = props;
+  const [showInfo, setShowInfo] = useState(false);
+  // const [isExist, setIsExist] = useState(false);
+
   const onSubmit = async (values) => {
+    // const found = categoryList?.findIndex((el) => el.name === values?.name);
+    // if (found >= 0) {
+    //   setShowInfo(true);
+    //   setIsExist(true);
+    // } else {
+    //   setIsExist(false);
+    // }
     updateCategory(values);
   };
   useEffect(() => {
+    setShowInfo(false);
+  }, []);
+  useEffect(() => {
     if (isCategoryUpdated) {
-      navigation.navigate("Category");
+      setShowInfo(true);
+      // navigation.navigate("Category");
     }
   }, [isCategoryUpdated]);
   return (
@@ -48,6 +68,7 @@ export default function EditCategory(props) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={categoryDetails}
+            validationSchema={validationSchema}
             onSubmit={(values) => onSubmit(values)}
           >
             {({
@@ -56,23 +77,43 @@ export default function EditCategory(props) {
               handleSubmit,
               setFieldValue,
               values,
+              isValid,
+              touched,
+              submitCount,
             }) => (
               <>
                 <View style={commonStyle.appContainer}>
-                  <View style={commonStyle.card}>
-                    <View style={styles.categoryName}>
+                  {showInfo ? (
+                    <View style={commonStyle.success}>
                       <Text
-                        fontSize={14}
+                        fontSize={24}
+                        fontWeight="bold"
+                        lineHeight={25}
+                        textAlign="center"
+                        text={"Category Updated"}
+                      />
+                    </View>
+                  ) : null}
+                  <View style={commonStyle.card}>
+                    {/* <View style={styles.categoryName}>
+                      <Text
+                        fontSize={16}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
-                        text={categoryDetails.id}
-                        style={styles.categoryName}
+                        text="ID "
                       />
-                    </View>
+                      <Text
+                        fontSize={18}
+                        fontWeight="bold"
+                        lineHeight={20}
+                        textAlign="left"
+                        text={categoryDetails.id}
+                      />
+                    </View> */}
                     <View style={styles.column}>
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -85,7 +126,7 @@ export default function EditCategory(props) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -99,6 +140,14 @@ export default function EditCategory(props) {
                         placeholder={{ label: "Select", value: 0, key: 0 }}
                         items={STATUS}
                       />
+                      {!isValid && touched && submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                     </View>
                   </View>
                 </View>
@@ -132,7 +181,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
+    borderRadius: 22,
     width: deviceWidth - 100,
     height: deviceHeight - 200,
     margin: 50,
@@ -154,11 +203,13 @@ const styles = StyleSheet.create({
     height: 15,
   },
   categoryName: {
+    flexDirection: "row",
     backgroundColor: Colors.secondaryLight,
     padding: 5,
     borderRadius: 10,
     justifyContent: "flex-start",
     fontWeight: "bold",
+    width: 80,
   },
   input: {
     fontSize: 20,

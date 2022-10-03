@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View, TextInput, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
@@ -12,25 +12,36 @@ import Picker from "./../components/common/Picker";
 import { STATUS } from "../constants/strings";
 import commonStyle from "./style/commonStyle";
 import { Ionicons } from "@expo/vector-icons";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  address: yup.string().required(),
+  mobile: yup.string().required(),
+  city: yup.string().required(),
+  timezone: yup.string().required(),
+  status: yup.string().required(),
+});
 
 export default function EditGym(props) {
   const { updateGym, isGymUpdated, cityList, timezoneList } = gymServices();
   const {
-    navigation,
     route: {
       params: { gymDetails },
     },
   } = props;
+  const [userInfo, setUserInfo] = useState(false);
+
   const onSubmit = async (values) => {
     console.log("Submit", values);
     updateGym(values);
   };
   useEffect(() => {
     if (isGymUpdated) {
-      console.log("### isGymUpdated", isGymUpdated);
-      navigation.navigate("Gym List");
+      setUserInfo(true);
     }
   }, [isGymUpdated]);
+
   console.log("### gymDetails", gymDetails);
   return (
     <SafeAreaProvider>
@@ -42,6 +53,7 @@ export default function EditGym(props) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={{ ...gymDetails }}
+            validationSchema={validationSchema}
             onSubmit={(values) => onSubmit(values)}
           >
             {({
@@ -50,23 +62,43 @@ export default function EditGym(props) {
               handleSubmit,
               setFieldValue,
               values,
+              isValid,
+              touched,
+              submitCount,
             }) => (
               <>
                 <View style={commonStyle.appContainer2}>
+                  {userInfo ? (
+                    <View style={commonStyle.success}>
+                      <Text
+                        fontSize={24}
+                        fontWeight="bold"
+                        lineHeight={25}
+                        textAlign="center"
+                        text="Successfully Updated."
+                      />
+                    </View>
+                  ) : null}
                   <View style={commonStyle.card}>
                     <View style={styles.gymName}>
                       <Text
-                        fontSize={14}
+                        fontSize={16}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
+                        text="ID "
+                      />
+                      <Text
+                        fontSize={18}
+                        fontWeight="bold"
+                        lineHeight={20}
+                        textAlign="left"
                         text={gymDetails.id}
-                        style={styles.gymName}
                       />
                     </View>
                     <View style={styles.column}>
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -79,7 +111,7 @@ export default function EditGym(props) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -92,7 +124,7 @@ export default function EditGym(props) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -105,7 +137,7 @@ export default function EditGym(props) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -117,14 +149,13 @@ export default function EditGym(props) {
                           console.log(value, values);
                           setFieldValue("city", value);
                         }}
-                        // error={touched.city && errors.city}
                         placeholder={{ label: "Select", value: "", key: 0 }}
                         items={cityList ?? []}
                         style={commonStyle.input}
                       />
 
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -139,7 +170,7 @@ export default function EditGym(props) {
                         items={timezoneList ?? []}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -154,6 +185,14 @@ export default function EditGym(props) {
                         items={STATUS}
                       />
                     </View>
+                    {!isValid && touched && submitCount > 0 && (
+                      <Text
+                        fontSize={16}
+                        color="red"
+                        text={REQUIRED_FILEDS}
+                        textAlign="center"
+                      />
+                    )}
                   </View>
                 </View>
                 <View style={commonStyle.bottomButton}>
@@ -191,10 +230,13 @@ const styles = StyleSheet.create({
     height: 15,
   },
   gymName: {
+    flexDirection: "row",
     backgroundColor: Colors.secondaryLight,
     padding: 5,
+    paddingLeft: 10,
     borderRadius: 10,
     justifyContent: "flex-start",
     fontWeight: "bold",
+    width: 80,
   },
 });

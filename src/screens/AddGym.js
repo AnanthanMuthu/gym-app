@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View, TextInput, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
@@ -9,23 +9,37 @@ import { MEDIUM_GREY } from "../constants/colors";
 import { Formik } from "formik";
 import gymServices from "../services/gymServices";
 import Picker from "../components/common/Picker";
-import { STATUS } from "../constants/strings";
+import { REQUIRED_FILEDS, STATUS } from "../constants/strings";
 import commonStyle from "./style/commonStyle";
 import { Ionicons } from "@expo/vector-icons";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  name: yup.string().required(),
+  email: yup.string().required(),
+  mobile: yup.string().required(),
+  timezone: yup.string().required(),
+  city: yup.string().required(),
+  status: yup.string().required(),
+});
 
 export default function AddGym({ navigation }) {
   const { addGym, isGymAdded, cityList, timezoneList } = gymServices();
+  const [userInfo, setUserInfo] = useState(null);
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, resetForm) => {
     console.log("Submit", values);
     addGym(values);
+    resetForm();
   };
   useEffect(() => {
     if (isGymAdded) {
-      navigation.navigate("Gym List");
+      const userInfo = `User Name : ${isGymAdded?.username ?? ""} Password : ${
+        isGymAdded?.password ?? ""
+      }`;
+      setUserInfo(userInfo);
     }
   }, [isGymAdded]);
-
   return (
     <SafeAreaProvider>
       <ScreenContainer
@@ -43,7 +57,8 @@ export default function AddGym({ navigation }) {
               city: "",
               status: "",
             }}
-            onSubmit={(values) => onSubmit(values)}
+            validationSchema={validationSchema}
+            onSubmit={(values, { resetForm }) => onSubmit(values, resetForm)}
           >
             {({
               handleChange,
@@ -51,17 +66,39 @@ export default function AddGym({ navigation }) {
               handleSubmit,
               setFieldValue,
               values,
+              isValid,
+              touched,
+              submitCount,
             }) => (
               <>
                 <View style={commonStyle.appContainer2}>
-                  <View style={commonStyle.card}>
-                    <View style={styles.column}>
+                  {userInfo ? (
+                    <View style={commonStyle.success}>
+                      <Text
+                        fontSize={24}
+                        fontWeight="bold"
+                        lineHeight={25}
+                        textAlign="center"
+                        text="Successfully Created."
+                      />
                       <Text
                         fontSize={14}
                         fontWeight="normal"
                         lineHeight={20}
+                        textAlign="center"
+                        text={userInfo}
+                      />
+                    </View>
+                  ) : null}
+
+                  <View style={commonStyle.card}>
+                    <View style={styles.column}>
+                      <Text
+                        fontSize={18}
+                        fontWeight="normal"
+                        lineHeight={20}
                         textAlign="left"
-                        text="Full Name"
+                        text="Name"
                       />
                       <TextInput
                         onChangeText={handleChange("name")}
@@ -69,8 +106,9 @@ export default function AddGym({ navigation }) {
                         value={values.name}
                         style={commonStyle.input}
                       />
+
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -83,7 +121,7 @@ export default function AddGym({ navigation }) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -96,7 +134,7 @@ export default function AddGym({ navigation }) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -109,7 +147,7 @@ export default function AddGym({ navigation }) {
                         style={commonStyle.input}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -126,7 +164,7 @@ export default function AddGym({ navigation }) {
                       />
 
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -141,7 +179,7 @@ export default function AddGym({ navigation }) {
                         items={timezoneList ?? []}
                       />
                       <Text
-                        fontSize={14}
+                        fontSize={18}
                         fontWeight="normal"
                         lineHeight={20}
                         textAlign="left"
@@ -155,6 +193,14 @@ export default function AddGym({ navigation }) {
                         placeholder={{ label: "Select", value: "", key: "" }}
                         items={STATUS}
                       />
+                      {!isValid && touched && submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                     </View>
                   </View>
                 </View>

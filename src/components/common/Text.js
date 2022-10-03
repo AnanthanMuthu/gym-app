@@ -46,6 +46,7 @@ const Text = ({
   text,
   style,
   onPressText,
+  isUppercase,
   ...props
 }) => {
   return (
@@ -64,6 +65,7 @@ const Text = ({
         // },
         {
           fontSize,
+          fontWeight,
           lineHeight,
           letterSpacing,
           textAlign,
@@ -73,7 +75,7 @@ const Text = ({
       ]}
       {...props}
     >
-      {children || text}
+      {isUppercase ? text?.toUpperCase() : children || text}
     </NativeText>
   );
 };
@@ -90,15 +92,16 @@ Text.propTypes = {
   text: Proptypes.string,
   style: NativeText.propTypes.style,
   onPressText: Proptypes.func,
+  isUppercase: Proptypes.bool,
 };
 
 Text.defaultProps = {
   fontSize: 14,
   fontWeight: "normal",
   fontStyle: "normal",
-  lineHeight: 14,
+  lineHeight: 18,
   letterSpacing: 0,
-  textAlign: "center",
+  textAlign: "left",
   color: BLACK,
 };
 

@@ -32,6 +32,8 @@ import {
   setScheduleAdded,
   setScheduleDisplayList,
   setScheduleDisplay,
+  setGymPasswordUpdate,
+  setPlayMsg,
 } from "../redux/actions/gym";
 
 export default () => {
@@ -66,6 +68,8 @@ export default () => {
     isScheduleAdded,
     scheduleDisplayList,
     scheduleDisplay,
+    isPasswordUpdated,
+    playErrorMsg,
   } = useSelector((state) => state.gym);
 
   const dispatch = useDispatch();
@@ -77,7 +81,7 @@ export default () => {
 
     const response = await api.post("login.php", formData);
     console.log("### loginAPI", formData, response);
-    if (response) {
+    if (!response.error) {
       const userInfo = {
         name: response.name,
         type: response.type,
@@ -86,8 +90,9 @@ export default () => {
         userkey: response.userkey,
       };
       await AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
-      const result = !response.error ? userInfo : {};
-      dispatch(setUser(result));
+      dispatch(setUser(userInfo));
+    } else {
+      dispatch(setUser("invalid"));
     }
   };
 
@@ -97,13 +102,16 @@ export default () => {
     formData.append("gymid", "ALL");
 
     const response = await api.post("gym_details.php", formData);
+    console.log("### getGymList response", response);
 
     const result = !response.error ? response.gymdata : [];
     const res = result.map((el) => {
       return { label: el.name, value: el.id, key: el.id };
     });
+    dispatch(setGymAdded(false));
     dispatch(setGymDeleted(false));
     dispatch(setGymUpdate(false));
+    dispatch(setGymPasswordUpdate(false));
     dispatch(setModifiedGymList(res));
     dispatch(setGymList(result));
   };
@@ -122,16 +130,18 @@ export default () => {
     console.log("### getCategoryList", result, res);
     dispatch(setModCategoryUpdate(res));
     dispatch(setCategoryList(result));
+    dispatch(setCategoryUpdate(false));
+    dispatch(setCategoryAdded(false));
   };
 
-  const getSessionList = async () => {
+  const getSessionList = async (id) => {
     const formData = new FormData();
     formData.append("userid", user.userid);
-    formData.append("id", "ALL");
+    formData.append("id", id ? id : "ALL");
 
     const response = await api.post("session_list.php", formData);
-    const result = !response.error ? response.gymdata : [];
-    console.log("### getSessionList", formData, result);
+    const result = !response.error && response.gymdata ? response.gymdata : [];
+    console.log("### getSessionList", formData, response);
     const res = result.map((el) => {
       return { label: el.name, value: el.id, key: el.id };
     });
@@ -213,6 +223,7 @@ export default () => {
     dispatch(setPlayUpdate(false));
     dispatch(setPlayList(result));
     dispatch(setPlayAdded(false));
+    setPlayMsg(false);
   };
 
   const getCatBasedPlayList = async (data) => {
@@ -237,11 +248,11 @@ export default () => {
     dispatch(setCatBasedPlayList(res));
   };
 
-  const getDisplayList = async () => {
+  const getDisplayList = async (id) => {
     const formData = new FormData();
     formData.append("userid", user.userid);
     formData.append("displayid", "ALL");
-    formData.append("gym", user?.type == 1 ? "ALL" : user.gym);
+    formData.append("gym", id ? id : user?.type == 1 ? "ALL" : user.gym);
 
     const response = await api.post("display_details.php", formData);
     console.log("### getDisplayList", user, formData, response);
@@ -249,12 +260,14 @@ export default () => {
     const res = result.map((el) => {
       return { label: el.name, value: el.id, key: el.id };
     });
+    dispatch(setDisplayAdded(false));
     dispatch(setDisplayDeleted(false));
     dispatch(setModDisplayList(res));
     dispatch(setDisplayList(result));
   };
 
   const getScheduleList = async (data) => {
+    data.gym = data.gym ? data.gym : user.gym;
     data = { ...data, userid: user.userid };
     const formData = getFormData(data);
 
@@ -266,7 +279,7 @@ export default () => {
   };
 
   const getScheduleDisplay = async (data) => {
-    data = { ...data, display: 10, userid: user.userid };
+    data = { ...data, userid: user.userid };
     const formData = getFormData(data);
 
     const response = await api.post("display_schedule.php", formData);
@@ -302,7 +315,7 @@ export default () => {
 
     const response = await api.post("gym_create.php", formData);
     console.log("### addGym", data, response);
-    const result = !response.error ? true : false;
+    const result = !response.error ? response : false;
     getGymList();
     dispatch(setGymAdded(result));
   };
@@ -313,9 +326,20 @@ export default () => {
 
     const response = await api.post("gym_edit.php", formData);
     console.log("### updateGym  response", formData, response);
-    const result = !response.error ? true : false;
+    const result = !response.error ? response : false;
     getGymList();
     dispatch(setGymUpdate(result));
+  };
+
+  const resetGymPassword = async (data) => {
+    data = { ...data, userid: user.userid };
+    const formData = getFormData(data);
+
+    const response = await api.post("reset_password.php", formData);
+    console.log("### resetGymPassword  response", formData, response);
+    const result = !response.error ? response : false;
+    getGymList();
+    dispatch(setGymPasswordUpdate(result));
   };
 
   const deleteGym = async (data) => {
@@ -336,7 +360,7 @@ export default () => {
     const response = await api.post("display_create.php", formData);
     console.log("### addDisplay", data, response);
 
-    const result = !response.error ? true : false;
+    const result = !response.error ? response : false;
     getDisplayList();
     dispatch(setDisplayAdded(result));
   };
@@ -403,8 +427,12 @@ export default () => {
     const formData = getFormData(data);
 
     const response = await api.post("play_delete.php", formData);
-    console.log("### deletePlay", data, response);
-    getPlayList();
+    const res = response?.response === "Please play remove from session";
+    console.log("### deletePlay", res, playErrorMsg, data, response);
+    dispatch(setPlayMsg(res));
+    if (!res) {
+      getPlayList();
+    }
   };
 
   const assignSchedule = async (data) => {
@@ -469,6 +497,7 @@ export default () => {
     modCategoryList,
     isGymDeleted,
     isDisplayDeleted,
+    isPasswordUpdated,
     sessionList,
     modPlayList,
     catPlayList,
@@ -481,6 +510,7 @@ export default () => {
     isScheduleAdded,
     scheduleDisplayList,
     scheduleDisplay,
+    playErrorMsg,
     getGymList,
     getCategoryList,
     getPlayList,
@@ -510,5 +540,6 @@ export default () => {
     assignSchedule,
     getScheduleDisplayList,
     getScheduleDisplay,
+    resetGymPassword,
   };
 };

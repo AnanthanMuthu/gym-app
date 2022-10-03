@@ -10,6 +10,7 @@ import commonStyle from "./style/commonStyle";
 import Picker from "../components/common/Picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ScheduleListChild from "../components/ScheduleListChild";
+import { formatDate } from "./helper";
 
 export default function ScheduleList({ navigation, route }) {
   const {
@@ -24,9 +25,10 @@ export default function ScheduleList({ navigation, route }) {
   const [displayFromScheduleList, setDisplay] = useState([]);
   const [date1, setDate] = useState(new Date());
   useEffect(() => {
-    getSessionList();
+    // getSessionList(gymData);
     getGymList();
   }, []);
+
   useEffect(() => {
     if (route?.params?.selectedDisplay) {
       console.log(
@@ -37,6 +39,7 @@ export default function ScheduleList({ navigation, route }) {
   }, [route?.params?.selectedDisplay]);
   useEffect(() => {
     if (scheduleList?.length > 0) {
+      console.log("### ScheduleList Parent", scheduleList);
       let result = [];
 
       scheduleList.forEach(function (elem) {
@@ -49,19 +52,28 @@ export default function ScheduleList({ navigation, route }) {
     }
   }, [scheduleList]);
   useEffect(() => {
-    if (date1) {
-      console.log("### date1", date1);
-    }
-  }, [date1]);
+    console.log("### effect", params);
+    const params = { gym: "ALL", sdate: formatDate(date1) };
+    getScheduleList(params);
+  }, []);
 
   function setGym(gym) {
     setGymData(gym);
-    getScheduleList({ gym, sdate: "01-08-2022" });
+    const params = { gym, sdate: formatDate(date1) };
+    console.log("### setGym", gym, gym.length, typeof gym, params);
+    getScheduleList(params);
   }
-  function onDateChange(d) {
+  function onDateChange(e, d) {
     setDate(d);
-    console.log("### onDateChange", d);
-    getScheduleList({ gym, sdate: "01-08-2022" });
+    console.log("### onDateChange", e, d);
+    if (e?.nativeEvent?.timestamp) {
+      let data = new Date(e?.nativeEvent?.timestamp).toLocaleDateString();
+      data = data.split("/").join("-");
+      setDate(new Date(e?.nativeEvent?.timestamp));
+      const params = { gym: gymData ?? "ALL", sdate: data };
+      console.log("### setGym", params);
+      getScheduleList(params);
+    }
   }
   return (
     <SafeAreaProvider>
@@ -73,29 +85,14 @@ export default function ScheduleList({ navigation, route }) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <View style={commonStyle.appContainer}>
             {user?.type === 1 ? (
-              <View style={styles.row}>
+              <View style={{ flexDirection: "row", justifyContent: "center" }}>
                 <View style={styles.gymSelect}>
                   <Picker
                     value={gymData}
-                    onValueChange={(value) => setGym(value)}
+                    onValueChange={setGym}
                     placeholder={{ label: "Select Gym", value: "", key: "" }}
                     items={modGymList ?? []}
                   />
-                </View>
-                <View>
-                  <TouchableOpacity
-                    style={commonStyle.topRightBtn}
-                    onPress={() =>
-                      gymData
-                        ? navigation.navigate("Assign Schedule ", {
-                            gymData,
-                            routeFrom: "Schedule",
-                          })
-                        : null
-                    }
-                  >
-                    <ButtonText>Assign Schedule</ButtonText>
-                  </TouchableOpacity>
                 </View>
               </View>
             ) : null}
@@ -103,8 +100,8 @@ export default function ScheduleList({ navigation, route }) {
             <View style={styles.row}>
               <View>
                 <DateTimePicker
-                  style={commonStyle.datePickerStyle}
-                  value={date1} //initial date from state
+                  style={commonStyle.datePickerStyle2}
+                  value={date1 || new Date()} //initial date from state
                   mode="date" //The enum of date, datetime and time
                   placeholder="select date"
                   format="DD-MM-YYYY"
@@ -122,6 +119,7 @@ export default function ScheduleList({ navigation, route }) {
                       marginLeft: 36,
                     },
                   }}
+                  onChange={(d) => onDateChange(d)}
                   onDateChange={(d) => onDateChange(d)}
                 />
               </View>
@@ -147,6 +145,19 @@ export default function ScheduleList({ navigation, route }) {
               </View>
             </ScrollView>
           </View>
+          <View style={commonStyle.bottomButton}>
+            <TouchableOpacity
+              style={commonStyle.submitBtn}
+              onPress={() =>
+                navigation.navigate("Assign Schedule ", {
+                  gymData,
+                  routeFrom: "Schedule",
+                })
+              }
+            >
+              <ButtonText fontSize={18}>Assign Schedule</ButtonText>
+            </TouchableOpacity>
+          </View>
         </ScreenLayout>
       </ScreenContainer>
     </SafeAreaProvider>
@@ -161,7 +172,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
+    borderRadius: 22,
     width: 330,
     height: 150,
     margin: 10,

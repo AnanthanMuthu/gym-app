@@ -29,6 +29,8 @@ import {
   SET_SCHEDULE_ADDED,
   SET_SCHEDULE_DISPLAY_LIST,
   SET_SCHEDULE_DISPLAY,
+  UPDATE_PASSWORD_GYM,
+  PLAY_DELETE_MSG,
 } from "../actions/gym";
 
 const initialState = {
@@ -62,6 +64,8 @@ const initialState = {
   isSessionAdded: false,
   isSessionUpdated: false,
   isScheduleAdded: false,
+  isPasswordUpdated: false,
+  playErrorMsg: false,
 };
 
 export const gymReducer = (state = initialState, { type, payload }) => {
@@ -243,6 +247,16 @@ export const gymReducer = (state = initialState, { type, payload }) => {
       return {
         ...state,
         scheduleDisplay: payload,
+      };
+    case UPDATE_PASSWORD_GYM:
+      return {
+        ...state,
+        isPasswordUpdated: payload,
+      };
+    case PLAY_DELETE_MSG:
+      return {
+        ...state,
+        playErrorMsg: payload,
       };
 
     default:

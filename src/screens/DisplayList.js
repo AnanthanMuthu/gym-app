@@ -1,5 +1,11 @@
-import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Text from "../components/common/Text";
 import { ButtonText } from "../components/styles";
@@ -7,16 +13,38 @@ import ScreenContainer from "../components/ScreenContainer";
 import ScreenLayout from "../components/ScreenLayout";
 import { DARK_GREY, MEDIUM_GREY, WHITE } from "../constants/colors";
 import gymServices from "../services/gymServices";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import commonStyle from "./style/commonStyle";
 import { TYPES } from "../constants/strings";
+import Picker from "../components/common/Picker";
+import Norecords from "../components/common/Norecords";
+
+const deviceHeight = Dimensions.get("window").height;
+const deviceWidth = Dimensions.get("window").width;
+const halfWidth = deviceWidth / 2;
 
 export default function DisplayList({ navigation }) {
-  const { getDisplayList, getGymList, displayList, modGymList } = gymServices();
+  const {
+    getDisplayList,
+    getGymList,
+    displayList,
+    modGymList,
+    resetGymPassword,
+    isPasswordUpdated,
+  } = gymServices();
   useEffect(() => {
     getDisplayList();
     getGymList();
   }, []);
+  const [selectedGym, setSelectedGym] = useState(null);
+
+  const [passInfo, setPassInfo] = useState(null);
+  useEffect(() => {
+    if (isPasswordUpdated) {
+      setPassInfo(`Password : ${isPasswordUpdated?.password ?? ""}`);
+    }
+  }, [isPasswordUpdated]);
+
   function getType(type) {
     const foundType = TYPES.find((el) => el.value === type);
     return foundType?.label ?? "";
@@ -25,7 +53,12 @@ export default function DisplayList({ navigation }) {
     const foundType = modGymList?.find((el) => el.value === gymId);
     return foundType?.label ?? "";
   }
- 
+  function setGym(gym) {
+    setSelectedGym(gym);
+    getDisplayList(gym);
+    console.log("### selected gym", gym);
+  }
+
   return (
     <SafeAreaProvider>
       <ScreenContainer
@@ -36,15 +69,35 @@ export default function DisplayList({ navigation }) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <View style={commonStyle.appContainer}>
             <ScrollView>
-              <View style={commonStyle.cardHead}>
-                {displayList?.length <= 0 ? (
+              <View style={styles.gymSelect}>
+                <Picker
+                  value={selectedGym}
+                  onValueChange={(value) => setGym(value)}
+                  placeholder={{ label: "Select Gym", value: "", key: "" }}
+                  items={modGymList ?? []}
+                />
+              </View>
+              {passInfo ? (
+                <View style={commonStyle.success}>
+                  <Text
+                    fontSize={24}
+                    fontWeight="bold"
+                    lineHeight={25}
+                    textAlign="center"
+                    text="Password reset successfully."
+                  />
                   <Text
                     fontSize={14}
-                    lineHeight={60}
-                    style={commonStyle.noRecords}
-                    color={WHITE}
-                    text="No Records found"
+                    fontWeight="normal"
+                    lineHeight={20}
+                    textAlign="center"
+                    text={passInfo}
                   />
+                </View>
+              ) : null}
+              <View style={commonStyle.cardHead}>
+                {displayList?.length <= 0 ? (
+                  <Norecords />
                 ) : (
                   displayList?.map((el, key) => (
                     <TouchableOpacity
@@ -143,13 +196,30 @@ export default function DisplayList({ navigation }) {
                             text="Password"
                             color={DARK_GREY}
                           />
-                          <Text
-                            fontSize={14}
-                            fontWeight="bold"
-                            lineHeight={20}
-                            textAlign="left"
-                            text="Reset"
-                          />
+
+                          <TouchableOpacity
+                            style={{ flexDirection: "row" }}
+                            onPress={(e) => {
+                              e.preventDefault();
+                              resetGymPassword({ id: el.gym });
+                            }}
+                          >
+                            <MaterialCommunityIcons
+                              name="restart"
+                              size={22}
+                              color="#ae8f73"
+                            />
+
+                            <Text
+                              fontSize={18}
+                              fontWeight="bold"
+                              lineHeight={20}
+                              textAlign="left"
+                              color="#ae8f73"
+                              text="Reset"
+                              style={{ paddingLeft: 3 }}
+                            />
+                          </TouchableOpacity>
                         </View>
                       </View>
                     </TouchableOpacity>
@@ -174,10 +244,17 @@ export default function DisplayList({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  gymSelect: {
+    flex: 1,
+    width: "75%",
+    paddingLeft: "25%",
+    marginRight: 10,
+    justifyContent: "center",
+  },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
-    width: 330,
+    borderRadius: 22,
+    width: halfWidth - 40,
     height: 220,
     margin: 10,
   },

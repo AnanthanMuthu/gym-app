@@ -39,7 +39,7 @@ export const CATEGORIES = [
 
 export const STATUS = [
   { label: "Active", value: 1, key: 1 },
-  { label: "InActive", value: 0, key: 0 },
+  { label: "Inactive", value: 0, key: 0 },
 ];
 
 export const FILE_TYPES = [
@@ -61,3 +61,6 @@ export const checkboxData = [
   { id: 6, txt: "Saturday", isChecked: false },
   { id: 7, txt: "Sunday", isChecked: false },
 ];
+
+export const REQUIRED_FILEDS = "You Must fill in all of the fields";
+export const INAVLID_USER = "Invalid User Name and Password";

@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 40,
     margin: 20,
   },
   imgView: {

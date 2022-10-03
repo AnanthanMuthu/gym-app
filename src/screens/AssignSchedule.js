@@ -9,6 +9,14 @@ import { Formik } from "formik";
 import gymServices from "../services/gymServices";
 import Picker from "../components/common/Picker";
 import commonStyle from "./style/commonStyle";
+import * as yup from "yup";
+import Text from "../components/common/Text";
+import { REQUIRED_FILEDS } from "../constants/strings";
+
+const validationSchema = yup.object().shape({
+  category: yup.string().required(),
+  play: yup.string().required(),
+});
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
@@ -43,9 +51,17 @@ export default function AssignSchedule(props) {
         <ScreenLayout paddingHorizontal={0} paddingBottom={0} useSafeArea>
           <Formik
             initialValues={{ category: "", play: "" }}
+            validationSchema={validationSchema}
             onSubmit={(values) => onSubmit(values)}
           >
-            {({ handleSubmit, setFieldValue, values }) => (
+            {({
+              handleSubmit,
+              setFieldValue,
+              values,
+              isValid,
+              touched,
+              submitCount,
+            }) => (
               <>
                 <View style={commonStyle.appContainer2}>
                   <View style={commonStyle.card}>
@@ -72,6 +88,14 @@ export default function AssignSchedule(props) {
                         }}
                         items={catPlayList ?? []}
                       />
+                      {!isValid && touched && submitCount > 0 && (
+                        <Text
+                          fontSize={16}
+                          color="red"
+                          text={REQUIRED_FILEDS}
+                          textAlign="center"
+                        />
+                      )}
                     </View>
                   </View>
                 </View>
@@ -104,7 +128,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: WHITE,
-    borderRadius: 10,
+    borderRadius: 22,
     width: deviceWidth - 100,
     height: deviceHeight - 200,
     margin: 50,

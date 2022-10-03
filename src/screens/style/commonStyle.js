@@ -1,14 +1,16 @@
 import { StyleSheet, Dimensions } from "react-native";
 import { BLACK, GREY, LIGHT_GREY, WHITE } from "../../constants/colors";
+import { RFValue } from "react-native-responsive-fontsize";
 
 let deviceWidth = Dimensions.get("window").width;
 let deviceHeight = Dimensions.get("window").height;
+const halfWidth = deviceWidth / 2;
 
 const btn = {
   flexDirection: "row",
   justifyContent: "center",
   alignItems: "center",
-  borderRadius: 15,
+  borderRadius: 7,
 };
 const commonStyle = StyleSheet.create({
   appContainer: {
@@ -23,10 +25,28 @@ const commonStyle = StyleSheet.create({
   card: {
     marginTop: 20,
     backgroundColor: WHITE,
-    borderRadius: 10,
+    borderRadius: 22,
     width: deviceWidth - 100,
     margin: 50,
-    padding: 50,
+    paddingTop: 30,
+    paddingHorizontal: 50,
+  },
+  success: {
+    marginLeft: halfWidth - 170,
+    backgroundColor: "#8dc63f",
+    borderRadius: "50%",
+    justifyContent: "center",
+    width: halfWidth,
+    padding: 20,
+  },
+  error: {
+    marginLeft: halfWidth - 170,
+    backgroundColor: "red",
+    color: WHITE,
+    borderRadius: "50%",
+    justifyContent: "center",
+    width: halfWidth,
+    padding: 20,
   },
   card2: {
     marginTop: 20,
@@ -42,7 +62,7 @@ const commonStyle = StyleSheet.create({
     margin: 20,
   },
   input: {
-    fontSize: 14,
+    fontSize: 18,
     minHeight: 30,
     marginTop: 12,
     marginBottom: 20,
@@ -55,18 +75,32 @@ const commonStyle = StyleSheet.create({
     textAlign: "left",
   },
   datePickerStyle: {
-    fontSize: 14,
-    minHeight: 30,
-    marginTop: 12,
-    marginBottom: 20,
+    fontSize: 18,
+    minHeight: 24,
+    marginTop: 10,
+    marginBottom: 10,
     borderWidth: 1,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 0,
     backgroundColor: LIGHT_GREY,
     borderRadius: 20,
     borderColor: GREY,
     textAlign: "left",
-    width: 200,
+    width: "100%",
+  },
+  datePickerStyle2: {
+    fontSize: 18,
+    minHeight: 24,
+    marginTop: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 0,
+    backgroundColor: LIGHT_GREY,
+    borderRadius: 20,
+    borderColor: GREY,
+    textAlign: "left",
+    width: 400,
   },
   dateInner: {
     dateIcon: {
@@ -79,19 +113,49 @@ const commonStyle = StyleSheet.create({
       margin: 0,
       borderWidth: 0,
       width: "100%",
+      alignItems: "flex-start",
     },
   },
   constantInput: {
-    fontSize: 20,
+    fontSize: 14,
     minWidth: 400,
     minHeight: 50,
     marginTop: 12,
     borderWidth: 1,
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: WHITE,
+    paddingLeft: 50,
+    backgroundColor: BLACK,
+    opacity: 0.8,
+    color: WHITE,
     borderRadius: 20,
-    textAlign: "center",
+    textAlign: "left",
+    fontFamily: "Montserrat-Regular",
+  },
+  constantInput2: {
+    fontSize: 20,
+    minWidth: "93%",
+    minHeight: 50,
+    marginTop: 12,
+    borderWidth: 1,
+    padding: 20,
+    backgroundColor: WHITE,
+    color: BLACK,
+    borderRadius: 20,
+    textAlign: "left",
+    fontFamily: "Montserrat-Regular",
+  },
+  constantInput3: {
+    fontSize: 20,
+    minWidth: "75%",
+    minHeight: 50,
+    marginTop: 12,
+    borderWidth: 1,
+    padding: 20,
+    backgroundColor: WHITE,
+    color: BLACK,
+    borderRadius: 20,
+    textAlign: "left",
+    fontFamily: "Montserrat-Regular",
   },
   bottomButton: {
     marginTop: 20,
@@ -134,11 +198,23 @@ const commonStyle = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: 10,
     marginRight: 10,
+    justifyContent: "flex-end",
+  },
+  smallBtn2: {
+    ...btn,
+    float: "right",
+    backgroundColor: "#ae8f73",
+    height: 24,
+    fontSize: 12,
+    paddingHorizontal: 10,
+    marginRight: 10,
+    justifyContent: "flex-end",
   },
   noRecords: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    minHeight: deviceHeight - 300,
   },
 });
 export default commonStyle;

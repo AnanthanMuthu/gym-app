@@ -3,6 +3,7 @@ import { GREY, LIGHT_GREY } from "../../../constants/colors";
 
 export const Container = styled.View`
   align-items: "center";
+  font-size: 18px;
 `;
 
 export const PickerContainer = styled.View`
@@ -14,12 +15,12 @@ export const PickerContainer = styled.View`
   margin-top: 10px;
   margin-bottom: 20px;
   min-height: 40px;
-  font-size: 20px;
+  font-size: 18px;
   align-items: "center";
 `;
 
 export const ErrorMessage = styled.Text`
   color: ${({ theme }) => theme.colors.error};
   margin-top: ${({ theme }) => theme.spacing.xs}px;
-  font-size: ${({ theme }) => theme.fonts.sizes.xs}px;
+  font-size: 18px;
 `;
